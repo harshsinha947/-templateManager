@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Template Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --surface2: #1a1a24;
+            --border: #2a2a38;
+            --accent: #6c63ff;
+            --accent2: #a78bfa;
+            --accent-glow: rgba(108,99,255,0.3);
+            --text: #e8e6f0;
+            --text-muted: #6b6880;
+            --text-dim: #9997a8;
+            --success: #34d399;
+            --error: #f87171;
+            --warning: #fbbf24;
+            --preview-bg: #0d0d15;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── NOISE TEXTURE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.4;
+        }
+
+        /* ═══════════════ LOGIN PAGE ═══════════════ */
+        #login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .login-bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+            top: -100px; left: -100px;
+        }
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(167,139,250,0.1) 0%, transparent 70%);
+            bottom: -80px; right: -80px;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 44px;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            box-shadow: 0 0 60px rgba(108,99,255,0.08), 0 32px 64px rgba(0,0,0,0.5);
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 60%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 36px;
+        }
+
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .login-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .login-sub {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-input::placeholder { color: var(--text-muted); }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+            letter-spacing: 0.02em;
+        }
+
+        .login-btn:hover { opacity: 0.9; box-shadow: 0 6px 30px rgba(108,99,255,0.55); }
+        .login-btn:active { transform: scale(0.99); }
+        .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .login-error {
+            background: rgba(248,113,113,0.12);
+            border: 1px solid rgba(248,113,113,0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: var(--error);
+            margin-top: 14px;
+            display: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ═══════════════ DASHBOARD PAGE ═══════════════ */
+        #dashboard-page {
+            display: none;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+        }
+
+        .header-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        .user-dot {
+            width: 8px; height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 14px;
+            color: var(--text-dim);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .logout-btn:hover { border-color: var(--error); color: var(--error); }
+
+        /* MAIN LAYOUT */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 0;
+            height: calc(100vh - 64px);
+        }
+
+        /* SIDEBAR / CONTROLS */
+        .controls-panel {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 32px 28px;
+            overflow-y: auto;
+        }
+
+        .panel-section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* DROPDOWN COMPONENT */
+        .dropdown-wrapper {
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .dropdown-wrapper.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-badge {
+            background: var(--accent);
+            color: white;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+        }
+
+        .custom-select-wrapper {
+            position: relative;
+        }
+
+        .custom-select {
+            width: 100%;
+            appearance: none;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 40px 12px 14px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .custom-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .custom-select:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .custom-select option { background: #1a1a24; }
+
+        .select-arrow {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* STEP CONNECTOR */
+        .step-connector {
+            display: flex;
+            align-items: center;
+            padding: 0 0 8px 23px;
+            gap: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .step-connector.visible { opacity: 1; }
+
+        .step-line {
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        /* TEMPLATE LIST */
+        .template-list {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .template-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .template-item:hover {
+            border-color: var(--accent);
+            background: rgba(108,99,255,0.06);
+        }
+
+        .template-item.active {
+            border-color: var(--accent);
+            background: rgba(108,99,255,0.12);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .template-item-icon {
+            width: 32px; height: 32px;
+            background: rgba(108,99,255,0.15);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .template-item-info { flex: 1; min-width: 0; }
+
+        .template-item-name {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .template-item-type {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .template-loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 12px 0;
+        }
+
+        /* PREVIEW PANEL */
+        .preview-panel {
+            background: var(--preview-bg);
+            padding: 32px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .preview-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .preview-badge {
+            font-size: 11px;
+            background: rgba(108,99,255,0.2);
+            border: 1px solid rgba(108,99,255,0.3);
+            color: var(--accent2);
+            border-radius: 100px;
+            padding: 3px 10px;
+            font-weight: 500;
+        }
+
+        .preview-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60%;
+            gap: 16px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .preview-empty-icon {
+            width: 72px; height: 72px;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            color: var(--border);
+        }
+
+        .preview-empty-text { font-size: 14px; max-width: 200px; line-height: 1.5; }
+
+        /* JSON PREVIEW CARD */
+        .preview-content {
+            display: none;
+            animation: fadeSlideUp 0.4s ease forwards;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .preview-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .preview-card-header {
+            background: var(--surface2);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .preview-card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 10px;
+            color: var(--text-dim);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .copy-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+        .preview-card-body { padding: 18px; }
+
+        /* Template rendered preview */
+        .template-preview-render {
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .template-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .meta-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .meta-item-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .meta-item-value {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border-radius: 100px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-pill.approved { background: rgba(52,211,153,0.15); color: var(--success); }
+        .status-pill.pending { background: rgba(251,191,36,0.15); color: var(--warning); }
+        .status-pill.rejected { background: rgba(248,113,113,0.15); color: var(--error); }
+
+        /* Raw JSON viewer */
+        .json-viewer {
+            background: #070710;
+            border-radius: 10px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.7;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .json-key { color: #a78bfa; }
+        .json-string { color: #34d399; }
+        .json-number { color: #fbbf24; }
+        .json-boolean { color: #60a5fa; }
+        .json-null { color: #9ca3af; }
+
+        /* TABS */
+        .preview-tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-radius: 7px;
+            padding: 7px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a50; }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 13px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 9999;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-color: rgba(52,211,153,0.4); }
+        .toast.error { border-color: rgba(248,113,113,0.4); }
+
+        /* Page transitions */
+        .page { transition: opacity 0.3s; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
+<div id="login-page" class="page">
+    <div class="login-bg-orb orb-1"></div>
+    <div class="login-bg-orb orb-2"></div>
+
+    <div class="login-card">
+        <div class="brand-logo">
+            <div class="logo-icon">⚡</div>
+            <span class="logo-text">TemplateManager</span>
+        </div>
+
+        <h1 class="login-title">Welcome back</h1>
+        <p class="login-sub">Sign in to manage your RBM templates</p>
+
+        <div class="form-group">
+            <label class="form-label" for="email-input">Email Address</label>
+            <input type="email" id="email-input" class="form-input" placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="pass-input">Password</label>
+            <input type="password" id="pass-input" class="form-input" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+
+        <div class="login-error" id="login-error"></div>
+    </div>
+</div>
+
+<!-- ═══════════════ DASHBOARD PAGE ═══════════════ -->
+<div id="dashboard-page" class="page">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-logo">⚡</div>
+            <span class="header-title">Template Manager</span>
+        </div>
+        <div class="header-right">
+            <div class="user-badge">
+                <div class="user-dot"></div>
+                <span id="user-display">User</span>
+            </div>
+            <button class="logout-btn" onclick="doLogout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="main-layout">
+        <!-- CONTROLS PANEL -->
+        <div class="controls-panel">
+            <div class="panel-section-title">Configuration</div>
+
+            <!-- STEP 1: Bot -->
+            <div class="dropdown-wrapper visible" id="bot-wrapper">
+                <div class="dropdown-label">
+                    <span class="step-badge">1</span>
+                    Bot ID
+                </div>
+                <div class="custom-select-wrapper">
+                    <select class="custom-select" id="bot-select" onchange="onBotChange()" disabled>
+                        <option value="">— Select a Bot —</option>
+                    </select>
+                    <span class="select-arrow">▾</span>
+                </div>
+            </div>
+
+            <!-- CONNECTOR 1→2 -->
+            <div class="step-connector" id="connector-2">
+                <div class="step-line"></div>
+            </div>
+
+            <!-- STEP 2: Templates -->
+            <div class="dropdown-wrapper" id="template-wrapper">
+                <div class="dropdown-label">
+                    <span class="step-badge">2</span>
+                    Templates
+                </div>
+                <div id="template-list-container">
+                    <div style="color: var(--text-muted); font-size: 13px; padding: 8px 0;">
+                        Select a bot to load templates
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PREVIEW PANEL -->
+        <div class="preview-panel">
+            <div class="preview-header">
+                <span class="preview-title">Preview</span>
+                <span class="preview-badge" id="preview-badge">No selection</span>
+            </div>
+
+            <!-- Empty state -->
+            <div class="preview-empty" id="preview-empty">
+                <div class="preview-empty-icon">📄</div>
+                <p class="preview-empty-text">Select a template from the left panel to preview its content</p>
+            </div>
+
+            <!-- Preview content -->
+            <div class="preview-content" id="preview-content">
+                <div class="preview-tabs">
+                    <button class="tab-btn active" onclick="switchTab('rendered')">Rendered</button>
+                    <button class="tab-btn" onclick="switchTab('raw')">Raw JSON</button>
+                </div>
+
+                <div class="tab-panel active" id="tab-rendered">
+                    <div class="template-preview-render" id="rendered-preview"></div>
+                </div>
+
+                <div class="tab-panel" id="tab-raw">
+                    <div class="preview-card">
+                        <div class="preview-card-header">
+                            <span class="preview-card-title">JSON Response</span>
+                            <button class="copy-btn" onclick="copyJson()">Copy</button>
+                        </div>
+                        <div class="preview-card-body">
+                            <div class="json-viewer" id="json-viewer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ─── STATE ───
+    let currentUser = null;
+    let brandBotMap = {};
+    let allTemplates = [];
+    let selectedTemplateData = null;
+    const API_BASE = '';
+
+    // ─── LOGIN ───
+    async function doLogin() {
+        const email = document.getElementById('email-input').value.trim();
+        const pass  = document.getElementById('pass-input').value;
+        const btn   = document.getElementById('login-btn');
+        const errEl = document.getElementById('login-error');
+
+        if (!email || !pass) { showLoginError('Please enter your email and password'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Signing in...';
+        errEl.style.display = 'none';
+
+        try {
+            const res  = await fetch(`${API_BASE}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: email, password: pass })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                currentUser = { username: data.username, fullname: data.fullname };
+                brandBotMap = data.brandBotMap || {};
+                initDashboard(data);
+            } else {
+                showLoginError(data.message || 'Login failed. Please try again.');
+            }
+        } catch (e) {
+            showLoginError('Connection error. Check server is running.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Sign In';
+        }
+    }
+
+    function showLoginError(msg) {
+        const el = document.getElementById('login-error');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    document.getElementById('pass-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doLogin();
+    });
+
+    // ─── INIT DASHBOARD ───
+    function initDashboard(data) {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('dashboard-page').style.display = 'block';
+        document.getElementById('user-display').textContent = data.fullname || data.username;
+
+        // Debug: log full login response to console
+        console.log('Login response brandBotMap:', JSON.stringify(data.brandBotMap, null, 2));
+
+        // Populate Bot dropdown
+        const botSelect = document.getElementById('bot-select');
+        botSelect.innerHTML = '<option value="">— Select a Bot —</option>';
+        const map = data.brandBotMap || {};
+
+        const seen = new Set();
+        Object.values(map).forEach(bots => {
+            bots.forEach(b => {
+                const displayName = b.botName || 'Unknown';
+                const botIdVal    = (b.botId && b.botId.trim()) ? b.botId.trim() : '';
+                const key = displayName + '|' + botIdVal;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    const opt = document.createElement('option');
+                    // value is ALWAYS the botId (may be empty if not in DB)
+                    opt.value           = botIdVal;
+                    opt.dataset.botid   = botIdVal;
+                    opt.dataset.botname = displayName;
+                    // Show warning in dropdown if botId missing
+                    opt.textContent = botIdVal ? displayName : displayName + ' ⚠ (no botId)';
+                    botSelect.appendChild(opt);
+                }
+            });
+        });
+        botSelect.disabled = false;
+    }
+
+    // ─── BOT CHANGE → load templates ───
+    async function onBotChange() {
+        const botSelect      = document.getElementById('bot-select');
+        const selectedOption = botSelect.options[botSelect.selectedIndex];
+        const botId          = (botSelect.value || '').trim();
+
+        const templateWrapper = document.getElementById('template-wrapper');
+        const connector2      = document.getElementById('connector-2');
+        const container       = document.getElementById('template-list-container');
+
+        resetPreview();
+
+        // Nothing selected
+        if (!botSelect.value && botSelect.value !== '0') {
+            templateWrapper.classList.remove('visible');
+            connector2.classList.remove('visible');
+            container.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">Select a bot to load templates</div>';
+            return;
+        }
+
+        // ALWAYS show step 2 when a bot is chosen
+        connector2.classList.add('visible');
+        templateWrapper.classList.add('visible');
+
+        if (!botId) {
+            const botName = selectedOption ? selectedOption.dataset.botname || selectedOption.textContent : '';
+            container.innerHTML = `<div style="color:var(--error);font-size:13px;padding:8px 0">⚠ No Bot ID in database for <b>${escapeHtml(botName)}</b>. Please add the botId in the login_mapping table.</div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="template-loading">
+                <span class="spinner" style="border-color:rgba(108,99,255,0.3);border-top-color:var(--accent)"></span>
+                Fetching templates...
+            </div>`;
+
+        try {
+            const res  = await fetch(`${API_BASE}/api/templates/list?botId=${encodeURIComponent(botId)}`);
+            const data = await res.json();
+
+            if (data && Array.isArray(data.templates)) {
+                allTemplates = data.templates;
+            } else if (Array.isArray(data)) {
+                allTemplates = data;
+            } else {
+                allTemplates = [];
+            }
+
+            if (allTemplates.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">No templates found for this bot</div>';
+                return;
+            }
+
+            renderTemplateList(allTemplates, container);
+        } catch (e) {
+            container.innerHTML = `<div style="color:var(--error);font-size:13px;padding:8px 0">⚠ Failed to load templates: ${escapeHtml(e.message)}</div>`;
+        }
+    }
+
+    function renderTemplateList(templates, container) {
+        const list = document.createElement('div');
+        list.className = 'template-list';
+
+        templates.forEach((t, i) => {
+            const name = t.TemplateName || t.templateName || t.name || `Template ${i + 1}`;
+            let type = 'rich_card';
+            try {
+                const tj = typeof t.TemplateJson === 'string' ? JSON.parse(t.TemplateJson) : (t.TemplateJson || {});
+                type = tj.type || 'rich_card';
+            } catch(e) {}
+
+            const item = document.createElement('div');
+            item.className = 'template-item';
+            item.innerHTML = `
+                <div class="template-item-icon">${type === 'carousel' ? '🎠' : '📋'}</div>
+                <div class="template-item-info">
+                    <div class="template-item-name" title="${escapeHtml(name)}">${escapeHtml(name)}</div>
+                    <div class="template-item-type">${escapeHtml(type)}</div>
+                </div>`;
+            item.onclick = () => selectTemplate(item, t);
+            list.appendChild(item);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(list);
+    }
+
+    // ─── SELECT TEMPLATE → parse TemplateJson → preview ───
+    function selectTemplate(el, templateRow) {
+        document.querySelectorAll('.template-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+
+        const name = templateRow.TemplateName || templateRow.templateName || templateRow.name || 'Template';
+
+        let tj = {};
+        try {
+            tj = typeof templateRow.TemplateJson === 'string'
+                ? JSON.parse(templateRow.TemplateJson)
+                : (templateRow.TemplateJson || templateRow);
+        } catch(e) {
+            tj = templateRow;
+        }
+
+        selectedTemplateData = tj;
+        showPreview(tj, name);
+    }
+
+    // ─── PREVIEW ───
+    function showPreview(tj, displayName) {
+        document.getElementById('preview-empty').style.display = 'none';
+        const content = document.getElementById('preview-content');
+        content.style.display = 'block';
+        content.style.animation = 'none';
+        void content.offsetWidth;
+        content.style.animation = 'fadeSlideUp 0.4s ease forwards';
+
+        document.getElementById('preview-badge').textContent = displayName || tj.name || 'Template';
+
+        renderRbmPreview(tj);
+        document.getElementById('json-viewer').innerHTML = syntaxHighlight(JSON.stringify(tj, null, 2));
+    }
+
+    // ─── RBM CARD RENDERER ───
+    function renderRbmPreview(tj) {
+        const container = document.getElementById('rendered-preview');
+        const type = (tj.type || '').toLowerCase();
+
+        let html = `<div style="font-family:'DM Sans',sans-serif">`;
+
+        // Meta info bar
+        html += `
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+                <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">${escapeHtml(tj.name || '—')}</span>
+                <span style="background:rgba(108,99,255,0.2);border:1px solid rgba(108,99,255,0.4);border-radius:12px;padding:3px 10px;font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:.04em">${escapeHtml(type || 'unknown')}</span>
+            </div>
+            <div class="template-meta-grid" style="margin-bottom:16px">
+                <div class="meta-item"><div class="meta-item-label">Bot ID</div><div class="meta-item-value" style="font-size:11px;word-break:break-all">${escapeHtml(tj.botId || '—')}</div></div>
+                <div class="meta-item"><div class="meta-item-label">Width</div><div class="meta-item-value">${escapeHtml(tj.width || '—')}</div></div>
+                <div class="meta-item"><div class="meta-item-label">Height</div><div class="meta-item-value">${escapeHtml(tj.height || '—')}</div></div>
+                <div class="meta-item"><div class="meta-item-label">State</div><div class="meta-item-value">${escapeHtml(tj.templateState || '—')}</div></div>
+            </div>`;
+
+        if (type === 'carousel' && Array.isArray(tj.carouselList) && tj.carouselList.length) {
+            html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px">Carousel Cards (${tj.carouselList.length})</div>`;
+            html += `<div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:10px">`;
+            tj.carouselList.forEach(card => { html += buildCardHtml(card); });
+            html += `</div>`;
+        } else if (tj.standAlone) {
+            html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px">Rich Card</div>`;
+            html += buildCardHtml(tj.standAlone);
+        }
+
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+
+    function buildCardHtml(card) {
+        const title  = card.cardTitle       || '';
+        const desc   = card.cardDescription || '';
+        const file   = card.thumbnailFileName || card.fileName || '';
+        const suggs  = card.suggestions     || [];
+
+        let h = `<div style="min-width:240px;max-width:300px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden">`;
+
+        // Image placeholder with filename
+        if (file) {
+            h += `<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+                    <span style="font-size:18px">🖼</span>
+                    <span style="font-size:11px;color:var(--text-muted);word-break:break-all;line-height:1.4">${escapeHtml(file)}</span>
+                  </div>`;
+        }
+
+        h += `<div style="padding:14px">`;
+
+        if (title) {
+            h += `<div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.4">${escapeHtml(title)}</div>`;
+        }
+
+        if (desc) {
+            h += `<div style="font-size:12px;color:var(--text-dim);line-height:1.65;margin-bottom:12px;white-space:pre-line">${escapeHtml(desc)}</div>`;
+        }
+
+        if (suggs.length) {
+            h += `<div style="display:flex;flex-direction:column;gap:7px">`;
+            suggs.forEach(s => {
+                const label = s.displayText || s.text || '—';
+                let icon = '💬', bg = 'rgba(100,100,120,0.15)', border = 'rgba(100,100,120,0.3)', color = 'var(--text-dim)';
+                if (s.suggestionType === 'url_action')    { icon = '🔗'; bg = 'rgba(52,211,153,0.1)';  border = 'rgba(52,211,153,0.3)';  color = '#34d399'; }
+                if (s.suggestionType === 'dialer_action') { icon = '📞'; bg = 'rgba(251,191,36,0.1)';  border = 'rgba(251,191,36,0.3)';  color = '#fbbf24'; }
+                if (s.suggestionType === 'reply')         { icon = '↩'; bg = 'rgba(108,99,255,0.12)'; border = 'rgba(108,99,255,0.3)';  color = 'var(--accent2)'; }
+                h += `<div style="background:${bg};border:1px solid ${border};border-radius:20px;padding:7px 14px;font-size:12px;color:${color};display:flex;align-items:center;gap:8px;cursor:default">
+                        <span>${icon}</span><span>${escapeHtml(label)}</span>
+                      </div>`;
+            });
+            h += `</div>`;
+        }
+
+        h += `</div></div>`;
+        return h;
+    }
+
+    function resetFromBot() {
+        document.getElementById('connector-2').classList.remove('visible');
+        document.getElementById('template-wrapper').classList.remove('visible');
+        document.getElementById('template-list-container').innerHTML =
+            '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">Select a bot to load templates</div>';
+        resetPreview();
+    }
+
+    function resetPreview() {
+        document.getElementById('preview-empty').style.display = 'flex';
+        document.getElementById('preview-content').style.display = 'none';
+        document.getElementById('preview-badge').textContent = 'No selection';
+        selectedTemplateData = null;
+        document.querySelectorAll('.template-item').forEach(i => i.classList.remove('active'));
+    }
+
+    // ─── TABS ───
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach((b, i) => {
+            b.classList.toggle('active', (i === 0 && tab === 'rendered') || (i === 1 && tab === 'raw'));
+        });
+        document.getElementById('tab-rendered').classList.toggle('active', tab === 'rendered');
+        document.getElementById('tab-raw').classList.toggle('active', tab === 'raw');
+    }
+
+    // ─── COPY JSON ───
+    function copyJson() {
+        if (!selectedTemplateData) return;
+        navigator.clipboard.writeText(JSON.stringify(selectedTemplateData, null, 2))
+            .then(() => showToast('✓ JSON copied to clipboard', 'success'))
+            .catch(() => showToast('Copy failed', 'error'));
+    }
+
+    // ─── LOGOUT ───
+    function doLogout() {
+        currentUser = null;
+        brandBotMap = {};
+        allTemplates = [];
+        selectedTemplateData = null;
+        document.getElementById('dashboard-page').style.display = 'none';
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('email-input').value = '';
+        document.getElementById('pass-input').value = '';
+        document.getElementById('login-error').style.display = 'none';
+        const botSel = document.getElementById('bot-select');
+        botSel.innerHTML = '<option value="">— Select a Bot —</option>';
+        botSel.disabled = true;
+        document.getElementById('connector-2').classList.remove('visible');
+        document.getElementById('template-wrapper').classList.remove('visible');
+        resetPreview();
+    }
+
+    // ─── HELPERS ───
+    function syntaxHighlight(json) {
+        return json
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+                let cls = 'json-number';
+                if (/^"/.test(match)) { cls = /:$/.test(match) ? 'json-key' : 'json-string'; }
+                else if (/true|false/.test(match)) cls = 'json-boolean';
+                else if (/null/.test(match)) cls = 'json-null';
+                return `<span class="${cls}">${match}</span>`;
+            });
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+</script>
+</body>
+</html>
