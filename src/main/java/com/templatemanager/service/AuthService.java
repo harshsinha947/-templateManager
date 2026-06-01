@@ -41,18 +41,25 @@ public class AuthService {
         // Fetch bot mappings for this user
         List<LoginMapping> mappings = loginMappingRepository.findByUsername(username);
 
-        // Log for debugging
+        // Log for debugging - ENHANCED
         System.out.println("=== LOGIN MAPPINGS for [" + username + "] — found: " + mappings.size() + " rows ===");
         for (LoginMapping m : mappings) {
-            System.out.println("  id=" + m.getId() + "  bot=" + m.getBot() + "  botId=[" + m.getBotId() + "]  mappingType=" + m.getMappingType());
+            System.out.println("  id=" + m.getId()
+                    + "  bot=" + m.getBot()
+                    + "  botId=[" + m.getBotId() + "] (NULL: " + (m.getBotId() == null) + ")"
+                    + "  botId.isEmpty: " + (m.getBotId() != null && m.getBotId().trim().isEmpty())
+                    + "  mappingType=" + m.getMappingType());
         }
 
         // Build brand -> bots structure (null-safe)
         // Key = botName (used as brand), value = list of {botId, botName}
         Map<String, List<Map<String, String>>> brandBotMap = new LinkedHashMap<>();
         for (LoginMapping m : mappings) {
-            String botName = (m.getBot()   != null && !m.getBot().trim().isEmpty())   ? m.getBot().trim()   : "Unknown";
-            String botId   = (m.getBotId() != null && !m.getBotId().trim().isEmpty()) ? m.getBotId().trim() : "";
+            String botName = (m.getBot() != null && !m.getBot().trim().isEmpty()) ? m.getBot().trim() : "Unknown";
+            // FIXED: Store botId even if empty, but log it for debugging
+            String botId = (m.getBotId() != null) ? m.getBotId().trim() : "";
+
+            System.out.println("  → Processing: botName=[" + botName + "], botId=[" + botId + "]");
 
             Map<String, String> botEntry = new HashMap<>();
             botEntry.put("botId",   botId);

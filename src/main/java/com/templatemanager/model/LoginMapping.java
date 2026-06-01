@@ -19,7 +19,7 @@ public class LoginMapping {
     @Column(name = "Bot", nullable = true)
     private String bot;
 
-    @Column(name = "BotId", nullable = true)
+    @Column(name = "bot_id", nullable = true)  // FIXED: Changed from "BotId" to "bot_id"
     private String botId;
 
     @Column(name = "MappingType", nullable = true)
